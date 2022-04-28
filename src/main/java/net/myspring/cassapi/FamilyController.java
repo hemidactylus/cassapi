@@ -36,9 +36,9 @@ public class FamilyController {
     public ResponseEntity<Family> getFamilyByName(@PathVariable String name){
         Optional<Family> familyOpt = familyRepository.findById(name);
         if (familyOpt.isPresent()){
-            return new ResponseEntity(familyOpt.get(), HttpStatus.OK);
+            return ResponseEntity.ok(familyOpt.get());
         }else{
-            return new ResponseEntity("Not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -60,8 +60,13 @@ public class FamilyController {
     }
 
     @DeleteMapping("/{name}")
-    public void deleteFamily(@PathVariable String name){
-        familyRepository.deleteById(name);
+    public ResponseEntity<Void> deleteFamily(@PathVariable String name){
+        if(familyRepository.existsById(name)) {
+            familyRepository.deleteById(name);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }else{
+            return ResponseEntity.notFound().build();
+        }
     }
 
 //	// Provided by the Starter
