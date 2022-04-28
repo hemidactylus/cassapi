@@ -1,0 +1,23 @@
+astra:
+  # Allow usage of devops and Stargate apis
+  api:
+    application-token: ${ASTRA_TOKEN}
+    database-id: ${ASTRA_ID}
+    database-region: ${ASTRA_REGION}
+
+  # Connectivity to Cassandra
+  cql:
+    enabled: true
+    download-scb:
+      enabled: true
+    driver-config:
+      basic:
+        session-keyspace: ${ASTRA_KEYSPACE}
+
+#spring:
+#  data:
+#    cassandra:
+#      schema-action: CREATE_IF_NOT_EXISTS
+#      contactpoints: 172.19.0.2
+#      local-datacenter: datacenter1
+#      keyspace-name: spring_cassandra
