@@ -14,10 +14,10 @@ astra:
       basic:
         session-keyspace: ${ASTRA_KEYSPACE}
 
-#spring:
-#  data:
-#    cassandra:
-#      schema-action: CREATE_IF_NOT_EXISTS
+spring:
+  data:
+    cassandra:
+      schema-action: CREATE_IF_NOT_EXISTS
 #      contactpoints: 172.19.0.2
 #      local-datacenter: datacenter1
 #      keyspace-name: spring_cassandra

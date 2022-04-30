@@ -2,5 +2,7 @@ package net.myspring.cassapi;
 
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
-public interface FamilyRepository extends CassandraRepository<Family, String> {
+import java.util.UUID;
+
+public interface TaxonRepository extends CassandraRepository<Taxon, UUID> {
 }
