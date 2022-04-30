@@ -1,9 +1,15 @@
 package net.myspring.cassapi;
 
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
+import com.datastax.oss.driver.api.querybuilder.select.Select;
 import org.apache.avro.generic.GenericData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.core.query.CassandraPageRequest;
+import org.springframework.data.cassandra.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +26,9 @@ public class classificationController {
     @Autowired
     private TaxonRepository taxonRepository;
 
+    @Autowired
+    private CassandraTemplate cassandraTemplate;
+
 //    @GetMapping("???")
 //    public Iterable<Taxon> families(){
 //        return taxonRepository.findAll(CassandraPageRequest.first(10)).toList();
@@ -35,28 +44,31 @@ public class classificationController {
         }
     }
 
+    @GetMapping("/taxa/by_name/{name}")
+    public ResponseEntity<Taxon> getTaxonByName(@PathVariable String name){
+        //
+        SimpleStatement select = SimpleStatement.newInstance(
+                "SELECT * FROM taxon WHERE name='" + name + "'"
+        );
+
+        Taxon taxon = cassandraTemplate.selectOne(select, Taxon.class);
+
+        if(taxon == null){
+            return ResponseEntity.notFound().build();
+        }else{
+            return ResponseEntity.ok(taxon);
+        }
+
+    }
+
     @GetMapping("/taxa/lineage/{id}")
     public ResponseEntity<List<Taxon>> getLineageById(@PathVariable UUID id){
-        List<Taxon> taxa = new ArrayList<>();
-        UUID childId = id;
-
-        Optional<Taxon> nextTaxonOpt = taxonRepository.findById(childId);
-        if(!nextTaxonOpt.isPresent()){
+        Optional<List<Taxon>> lineage = taxonRepository.getLineageById(id);
+        if (lineage.isPresent()){
+            return ResponseEntity.ok(lineage.get());
+        }else{
             return ResponseEntity.notFound().build();
         }
-
-        Taxon thisTaxon = nextTaxonOpt.get();
-        taxa.add(thisTaxon);
-        while(!thisTaxon.getId().equals(thisTaxon.getParent())){
-            nextTaxonOpt = taxonRepository.findById(thisTaxon.getParent());
-            if(!nextTaxonOpt.isPresent()){
-                break;
-            }
-            thisTaxon = nextTaxonOpt.get();
-            taxa.add(thisTaxon);
-        }
-        //
-        return ResponseEntity.ok(taxa);
     }
 
 //    @PostMapping()
