@@ -41,7 +41,15 @@ public class DataLoader {
                 "family",
                 "Daddy long-legs"
         ));
-	}
+
+        UUID idLoop1 = UUID.fromString("b09b68e2-68aa-4040-9fa8-c802a80c04f5");
+        UUID idLoop2 = UUID.fromString("21611fee-41e1-45df-b6cb-90153d44178e");
+        UUID idLoop3 = UUID.fromString("5836b62c-8337-4687-9e63-a2b4c23e5d25");
+        taxonRepository.save(new Taxon(idLoop1, idLoop2, "Paper",    "loopyGroup", "just testing cycle detection"));
+        taxonRepository.save(new Taxon(idLoop2, idLoop3, "Rock",     "loopyGroup", "just testing cycle detection"));
+        taxonRepository.save(new Taxon(idLoop3, idLoop1, "Scissors", "loopyGroup", "just testing cycle detection"));
+
+    }
 
 
 }

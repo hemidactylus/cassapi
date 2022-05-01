@@ -3,10 +3,7 @@ package net.myspring.cassapi;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public interface TaxonRepository extends CassandraRepository<Taxon, UUID> {
 
@@ -19,15 +16,20 @@ public interface TaxonRepository extends CassandraRepository<Taxon, UUID> {
             return Optional.empty();
         }
 
+        Set<UUID> foundIds = new HashSet<>();
+
         Taxon thisTaxon = nextTaxonOpt.get();
         taxa.add(thisTaxon);
-        while(!thisTaxon.getId().equals(thisTaxon.getParent())){
+        foundIds.add(thisTaxon.getId());
+
+        while(!foundIds.contains(thisTaxon.getParent())){
             nextTaxonOpt = findById(thisTaxon.getParent());
             if(!nextTaxonOpt.isPresent()){
                 break;
             }
             thisTaxon = nextTaxonOpt.get();
             taxa.add(thisTaxon);
+            foundIds.add(thisTaxon.getId());
         }
         //
         return Optional.of(taxa);
