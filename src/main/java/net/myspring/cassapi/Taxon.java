@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Table
 @Data
-@AllArgsConstructor
+//@AllArgsConstructor
 public class Taxon {
     @PrimaryKey
     @CassandraType(type = CassandraType.Name.UUID)
@@ -24,4 +24,17 @@ public class Taxon {
 
     private String level;
     private String description;
+
+    public Taxon(UUID id, UUID parent, String name, String level, String description) {
+        if(id == null) {
+            this.id = UUID.randomUUID();
+        }else{
+            this.id = id;
+        }
+        this.parent = parent;
+        this.name = name;
+        this.level = level;
+        this.description = description;
+    }
+
 }

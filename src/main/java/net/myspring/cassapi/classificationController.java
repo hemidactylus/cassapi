@@ -136,21 +136,21 @@ public class classificationController {
         }
     }
 
-//    @PostMapping()
-//    public ResponseEntity<Taxon> postTaxon(@RequestBody Taxon taxon){
-//        taxonRepository.save(taxon);
-//        return new ResponseEntity(taxon, HttpStatus.CREATED);
-//    }
+    @PostMapping("/taxa")
+    public ResponseEntity<Taxon> postTaxon(@RequestBody Taxon taxon){
+        taxonRepository.save(taxon);
+        return new ResponseEntity(taxon, HttpStatus.CREATED);
+    }
 
-//    @PutMapping()
-//    public ResponseEntity<Taxon> putTaxon(@RequestBody Taxon taxon){
-//        if(taxonRepository.existsById(taxon.getName())){
-//            taxonRepository.save(taxon);
-//            return new ResponseEntity(taxon, HttpStatus.OK);
-//        }else{
-//            taxonRepository.save(taxon);
-//            return postTaxon(taxon);
-//        }
-//    }
+    @PutMapping("/taxa")
+    public ResponseEntity<Taxon> putTaxon(@RequestBody Taxon taxon){
+        if(taxonRepository.existsById(taxon.getId())){
+            taxonRepository.save(taxon);
+            return new ResponseEntity(taxon, HttpStatus.OK);
+        }else{
+            taxonRepository.save(taxon);
+            return postTaxon(taxon);
+        }
+    }
 
 }
