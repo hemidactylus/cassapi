@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
+
 @RestController
 @SpringBootApplication
 public class classificationController {
@@ -47,9 +49,9 @@ public class classificationController {
     @GetMapping("/taxa/by_name/{name}")
     public ResponseEntity<Taxon> getTaxonByName(@PathVariable String name){
         //
-        SimpleStatement select = SimpleStatement.newInstance(
-                "SELECT * FROM taxon WHERE name='" + name + "'"
-        );
+        SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE name=?")
+                .addPositionalValues(name)
+                .build();
 
         Taxon taxon = cassandraTemplate.selectOne(select, Taxon.class);
 
@@ -58,6 +60,22 @@ public class classificationController {
         }else{
             return ResponseEntity.ok(taxon);
         }
+
+    }
+
+    @GetMapping("/taxa/children/{id}")
+    public ResponseEntity<List<Taxon>> getChildrenTaxa(@PathVariable UUID id){
+        //
+        SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE parent=?")
+                .addPositionalValues(id)
+                .build();
+
+        List<Taxon> taxa = cassandraTemplate.select(select, Taxon.class)
+                .stream()
+                .filter(taxon -> !taxon.getParent().equals(taxon.getId()))
+                .collect(toList());
+
+        return ResponseEntity.ok(taxa);
 
     }
 
