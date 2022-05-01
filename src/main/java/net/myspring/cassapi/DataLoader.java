@@ -19,6 +19,7 @@ public class DataLoader {
         UUID idAnimals = UUID.fromString("d309cf29-309b-44be-882b-8da2d6a5e735");
         UUID idArachnids = UUID.fromString("65043f8b-32e8-4fe2-bf4e-0aa7a2819f99");
         UUID idPholciidae = UUID.fromString("4883c31f-a83b-40ee-9ad2-d0bf5d709965");
+        UUID idSalticidae = UUID.fromString("015988be-4492-4d78-8b88-370dd60b1b7f");
 
         taxonRepository.save(new Taxon(
                 idAnimals,
@@ -40,6 +41,13 @@ public class DataLoader {
                 "Pholciidae",
                 "family",
                 "Daddy long-legs"
+        ));
+        taxonRepository.save(new Taxon(
+                idSalticidae,
+                idArachnids,
+                "Salticidae",
+                "family",
+                "Jumping spiders"
         ));
 
         UUID idLoop1 = UUID.fromString("b09b68e2-68aa-4040-9fa8-c802a80c04f5");

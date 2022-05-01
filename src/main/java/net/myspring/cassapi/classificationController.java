@@ -1,20 +1,13 @@
 package net.myspring.cassapi;
 
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
-import com.datastax.oss.driver.api.core.cql.Statement;
-import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
-import com.datastax.oss.driver.api.querybuilder.select.Select;
-import org.apache.avro.generic.GenericData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.cassandra.core.CassandraTemplate;
-import org.springframework.data.cassandra.core.query.CassandraPageRequest;
-import org.springframework.data.cassandra.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,10 +24,28 @@ public class classificationController {
     @Autowired
     private CassandraTemplate cassandraTemplate;
 
-//    @GetMapping("???")
-//    public Iterable<Taxon> families(){
-//        return taxonRepository.findAll(CassandraPageRequest.first(10)).toList();
-//    }
+    private List<Taxon> childrenTaxaById(UUID id){
+        SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE parent=?")
+                .addPositionalValues(id)
+                .build();
+
+        List<Taxon> taxa = cassandraTemplate.select(select, Taxon.class)
+                .stream()
+                .filter(taxon -> !taxon.getParent().equals(taxon.getId()))
+                .collect(toList());
+
+        return taxa;
+    }
+
+    private void pruneTaxon(UUID id){
+        // first get all children, call myself on their ID
+        childrenTaxaById(id).stream().forEach( c -> {
+            pruneTaxon(c.getId());
+        });
+        // and then delete this id
+        taxonRepository.deleteById(id);
+        return;
+    }
 
     @GetMapping("/taxa/{id}")
     public ResponseEntity<Taxon> getTaxonById(@PathVariable UUID id){
@@ -65,18 +76,8 @@ public class classificationController {
 
     @GetMapping("/taxa/children/{id}")
     public ResponseEntity<List<Taxon>> getChildrenTaxa(@PathVariable UUID id){
-        //
-        SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE parent=?")
-                .addPositionalValues(id)
-                .build();
-
-        List<Taxon> taxa = cassandraTemplate.select(select, Taxon.class)
-                .stream()
-                .filter(taxon -> !taxon.getParent().equals(taxon.getId()))
-                .collect(toList());
-
+        List<Taxon> taxa = childrenTaxaById(id);
         return ResponseEntity.ok(taxa);
-
     }
 
     @GetMapping("/taxa/lineage/{id}")
@@ -84,6 +85,52 @@ public class classificationController {
         Optional<List<Taxon>> lineage = taxonRepository.getLineageById(id);
         if (lineage.isPresent()){
             return ResponseEntity.ok(lineage.get());
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/taxa/{id}")
+    public ResponseEntity<Void> deleteTaxon(@PathVariable UUID id){
+        if(taxonRepository.existsById(id)) {
+            if(childrenTaxaById(id).isEmpty()) {
+                taxonRepository.deleteById(id);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }else{
+                return new ResponseEntity("Taxon has children", HttpStatus.BAD_REQUEST);
+            }
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/taxa/remap/{id}")
+    public ResponseEntity<Void> deleteRemapTaxon(@PathVariable UUID id){
+        Optional<Taxon> deleteeOpt = taxonRepository.findById(id);
+        if(deleteeOpt.isPresent()) {
+            Taxon deletee = deleteeOpt.get();
+            if(deletee.getId().equals(deletee.getParent())){
+                return new ResponseEntity("Taxon is root", HttpStatus.BAD_REQUEST);
+            }
+            List<Taxon> children = childrenTaxaById(id);
+            children.stream().forEach(c -> {
+                c.setParent(deletee.getParent());
+                taxonRepository.save(c);
+            });
+            taxonRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/taxa/prune/{id}")
+    public ResponseEntity<Void> deletePruneTaxon(@PathVariable UUID id){
+        Optional<Taxon> deleteeOpt = taxonRepository.findById(id);
+        if(deleteeOpt.isPresent()) {
+            //
+            pruneTaxon(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }else{
             return ResponseEntity.notFound().build();
         }
@@ -103,16 +150,6 @@ public class classificationController {
 //        }else{
 //            taxonRepository.save(taxon);
 //            return postTaxon(taxon);
-//        }
-//    }
-
-//    @DeleteMapping("/{name}")
-//    public ResponseEntity<Void> deleteTaxon(@PathVariable String name){
-//        if(taxonRepository.existsById(name)) {
-//            taxonRepository.deleteById(name);
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }else{
-//            return ResponseEntity.notFound().build();
 //        }
 //    }
 
