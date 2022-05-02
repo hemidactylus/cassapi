@@ -2,27 +2,28 @@ package net.myspring.cassapi;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.cassandra.core.mapping.CassandraType;
-import org.springframework.data.cassandra.core.mapping.Indexed;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.data.cassandra.core.mapping.*;
 
 import java.util.UUID;
 
-@Table
+@Table(value = "taxa")
 @Data
 //@AllArgsConstructor
 public class Taxon {
-    @PrimaryKey
+    @PrimaryKey("id")
     @CassandraType(type = CassandraType.Name.UUID)
     private UUID id;
 
-    @Indexed("parent_index")
+    @Indexed("taxa_parent_index")
+    @Column("parent")
     private UUID parent;
-    @Indexed("name_index")
+    @Indexed("taxa_name_index")
+    @Column("name")
     private String name;
 
+    @Column("level")
     private String level;
+    @Column("description")
     private String description;
 
     public Taxon(UUID id, UUID parent, String name, String level, String description) {

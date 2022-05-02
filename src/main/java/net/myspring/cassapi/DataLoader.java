@@ -38,7 +38,7 @@ public class DataLoader {
         taxonRepository.save(new Taxon(
                 idPholciidae,
                 idArachnids,
-                "Pholciidae",
+                "Pholcidae",
                 "family",
                 "Daddy long-legs"
         ));

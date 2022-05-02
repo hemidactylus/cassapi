@@ -1,9 +1,11 @@
 package net.myspring.cassapi;
 
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+//import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.cassandra.core.CassandraTemplate;
+import org.springframework.data.cassandra.core.query.Criteria;
+import org.springframework.data.cassandra.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +27,12 @@ public class classificationController {
     private CassandraTemplate cassandraTemplate;
 
     private List<Taxon> childrenTaxaById(UUID id){
-        SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE parent=?")
-                .addPositionalValues(id)
-                .build();
+//        SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE parent=?")
+//                .addPositionalValues(id)
+//                .build();
 
+        Query select = Query.query(Criteria.where("parent").is(id));
+        
         List<Taxon> taxa = cassandraTemplate.select(select, Taxon.class)
                 .stream()
                 .filter(taxon -> !taxon.getParent().equals(taxon.getId()))
@@ -59,6 +63,15 @@ public class classificationController {
 
     @GetMapping("/taxa/by_name/{name}")
     public ResponseEntity<Taxon> getTaxonByName(@PathVariable String name){
+        Optional<Taxon> taxonOpt = taxonRepository.findByName(name);
+        if(!taxonOpt.isPresent()){
+            return ResponseEntity.notFound().build();
+        }else{
+            return ResponseEntity.ok(taxonOpt.get());
+        }
+
+
+        /*
         //
         SimpleStatement select = SimpleStatement.builder("SELECT * FROM taxon WHERE name=?")
                 .addPositionalValues(name)
@@ -71,6 +84,7 @@ public class classificationController {
         }else{
             return ResponseEntity.ok(taxon);
         }
+        */
 
     }
 

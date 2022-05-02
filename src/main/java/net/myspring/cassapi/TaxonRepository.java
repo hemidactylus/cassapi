@@ -7,6 +7,8 @@ import java.util.*;
 
 public interface TaxonRepository extends CassandraRepository<Taxon, UUID> {
 
+    Optional<Taxon> findByName(String name);
+
     default Optional<List<Taxon>> getLineageById(UUID id){
         List<Taxon> taxa = new ArrayList<>();
         UUID childId = id;

@@ -17,7 +17,7 @@ astra:
 spring:
   data:
     cassandra:
-      schema-action: CREATE_IF_NOT_EXISTS
+      schema-action: NONE
 #      contactpoints: 172.19.0.2
 #      local-datacenter: datacenter1
 #      keyspace-name: spring_cassandra
