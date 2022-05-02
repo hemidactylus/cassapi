@@ -20,19 +20,19 @@ CREATE CUSTOM INDEX taxa_parent_index ON taxa (parent) USING 'StorageAttachedInd
 
 ## Notes
 
-#### Template vs Operations
+### Template vs Operations
 
 Class `CassandraTemplate` implements interface `CassandraOperations`.
 
 The latter in turn has a `getCqlOperations` method returning a `CqlOperations` object:
 this has [lower-level stuff](https://docs.spring.io/spring-data/cassandra/docs/current/api/org/springframework/data/cassandra/core/cql/CqlOperations.html).
 
-#### Annotate table names, etc
+### Annotate table names, etc
 
 Table names, primary/partition keys, column names: better
 to explicitly annotate everything in the domain class.
 
-#### Repository and finding by non-key
+### Repository and finding by non-key
 
 Just adding the method signature in the repository interface will make
 Spring Data Cassandra fill it for you:
@@ -41,7 +41,7 @@ Spring Data Cassandra fill it for you:
 Optional<Taxon> findByName(String name);
 ```
 
-#### What to execute with a CassandraTemplate
+### What to execute with a CassandraTemplate
 
 Both `Query` and `SimpleStatement` work fine:
 
@@ -57,7 +57,7 @@ cassandraTemplate.select(select1, Taxon.class) [...];
 cassandraTemplate.select(select2, Taxon.class) [...];
 ```
 
-#### Interchangeability Astra/Cassandra
+### Interchangeability Astra/Cassandra
 
 To switch from Astra to Cassandra, two things:
 
