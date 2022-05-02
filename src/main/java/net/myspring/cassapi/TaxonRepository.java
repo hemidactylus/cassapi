@@ -1,7 +1,6 @@
 package net.myspring.cassapi;
 
 import org.springframework.data.cassandra.repository.CassandraRepository;
-import org.springframework.http.ResponseEntity;
 
 import java.util.*;
 

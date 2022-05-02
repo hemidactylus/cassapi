@@ -1,6 +1,7 @@
 package net.myspring.cassapi;
 
 //import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import org.apache.pulsar.client.api.transaction.TransactionBufferClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.cassandra.core.CassandraTemplate;
@@ -22,6 +23,9 @@ public class classificationController {
 
     @Autowired
     private TaxonRepository taxonRepository;
+
+    @Autowired
+    private SpeciesRepository speciesRepository;
 
     @Autowired
     private CassandraTemplate cassandraTemplate;
@@ -165,6 +169,23 @@ public class classificationController {
             taxonRepository.save(taxon);
             return postTaxon(taxon);
         }
+    }
+
+    @GetMapping("/species/{name}")
+    public ResponseEntity<Species> getSpecies(@PathVariable String name){
+        Optional<Species> species = speciesRepository.findByName(name);
+        if (species.isPresent()){
+            return new ResponseEntity(species.get(), HttpStatus.OK);
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/species/by_taxon/{id}")
+    public List<Species> getSpeciesByTaxon(@PathVariable UUID id){
+        Query select = Query.query(Criteria.where("parent").is(id));
+        List<Species> species = cassandraTemplate.select(select, Species.class);
+        return species;
     }
 
 }

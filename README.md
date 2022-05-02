@@ -16,6 +16,16 @@ CREATE TABLE taxa (
 );
 CREATE CUSTOM INDEX taxa_name_index ON taxa (name) USING 'StorageAttachedIndex' WITH OPTIONS = {'case_sensitive': true};
 CREATE CUSTOM INDEX taxa_parent_index ON taxa (parent) USING 'StorageAttachedIndex';
+
+CREATE TABLE species (
+    parent uuid,
+    name text,
+    common_names frozen<map<text, text>>,
+    description text,
+    photo_url text,
+    PRIMARY KEY (parent, name)
+) WITH CLUSTERING ORDER BY (name ASC);
+CREATE CUSTOM INDEX species_name_index ON species (name) USING 'StorageAttachedIndex' WITH OPTIONS = {'case_sensitive': true};
 ```
 
 ## Notes
